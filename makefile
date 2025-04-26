@@ -20,7 +20,9 @@ demo: constructs.o otherfuncs.o supportivefuncs.o bitcellB.o contlist.o ownerfun
 	$(CC) $(CFLAGS) -o demo contlist.o constructs.o otherfuncs.o supportivefuncs.o bitcellB.o ownerfuncs.o fiolist.o demo_4.c -g
 
 run: 
-	clear && ./demo load out
+	clear && ./demo save out
+	./demo load out
+	./demo get 3 out
 clean:
 	rm demo
 	rm *.o 

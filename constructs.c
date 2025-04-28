@@ -36,7 +36,7 @@ void copydatas(DATA *strop, DATA *strcl)
 }
 
 /*Функция "пустой" конструктор для структуры aCash */
-CASH *default_construct()
+CASH *def_aCash_construct()
 {
     CASH *bank = (CASH *)malloc(sizeof(CASH));
 
@@ -49,7 +49,7 @@ CASH *default_construct()
     bank->data_open = def_data_construct();
     bank->data_close = def_data_construct();
     bank->bonus = def_bonus_construct();
-    bank->cellB = def_cell_construct();
+    bank->cellB = def_cell_struct_construct();
     if (!control_of_NULL(bank->data_open) || !control_of_NULL(bank->data_close) || !control_of_NULL(bank->data_close) || !control_of_NULL(bank->cellB))
         return NULL;
 
@@ -117,7 +117,7 @@ void construct(CASH *bank, char *id, char *num, int val, int type, double balanc
     bank->balance = balance;
     bonus_construct(bank->bonus, bonuses, bonpay, bonadd);
     cellB_construct(&(bank->bank_cell), cellid, cost, size, period, s_lvl, video, ac_type);
-    cell_construct(bank->cellB, cellid, cost, size, period, s_lvl, video, ac_type);
+    cell_struct_construct(bank->cellB, cellid, cost, size, period, s_lvl, video, ac_type);
 }
 
 /*Функция деструктор для структуры DATA*/
@@ -129,7 +129,7 @@ void destroy_dat(DATA *dat)
 }
 
 /*Функция деструктор для структуры aCash*/
-void destructor(CASH *bank)
+void destroy_aCash(CASH *bank)
 {
     free(bank->id);
     free(bank->num);

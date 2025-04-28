@@ -363,7 +363,7 @@ void demo_align(CASH *bank)
 }
 
 /*Пустой Конструктор новой структуры*/
-CELL *def_cell_construct()
+CELL *def_cell_struct_construct()
 {
     CELL *cell = (CELL *)malloc(sizeof(CELL));
 
@@ -378,7 +378,7 @@ CELL *def_cell_construct()
 }
 
 /*Конструктор для новой структуры*/
-void cell_construct(CELL *cell, uint id, uint cost, SIZ size, uint period, uint safety_lvl, bool video, bool access_type)
+void cell_struct_construct(CELL *cell, uint id, uint cost, SIZ size, uint period, uint safety_lvl, bool video, bool access_type)
 {
     cell->id = id;
     cell->cost = cost;

@@ -41,11 +41,12 @@ demo_container_element_text:
 	$(run) cont out -t 
 demo_container_element_bin:
 	$(run) cont out2 -b
+miss_few:
+	$(run) out 
+miss_incorrect:
+	$(run) out out out
 
 run: 
-# clear && ./demo save out -t
-# ./demo load out2 -b
-# ./demo get 3 out -b
 	./demo list out -t
 clean:
 	rm *.o 

@@ -17,6 +17,7 @@
 #define COMISS 300
 #define LENID 16
 #define LENNUM 20
+#define LENSTRS strlen("дебетовая") + 1
 #define MAXBONUS 3000
 
 typedef unsigned int uint;
@@ -67,9 +68,9 @@ typedef struct aCash
 int construct_data(DATA *, uint, int, int);
 void copydatas(DATA *, DATA *);
 DATA *def_data_construct();
-CASH *default_construct();
+CASH *def_aCash_construct();
 void construct(CASH *, char *, char *, int, int, double, uint, int, int, uint, int, int, ulg, uint, uint, uint, uint, bool, bool);
-void destructor(CASH *);
+void destroy_aCash(CASH *);
 BNS *def_bonus_construct();
 void bonus_construct(BNS *, uint, int, int);
 int isowner(char, int);

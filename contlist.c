@@ -148,7 +148,7 @@ void destroy_list(LIST a)
             ONE *temp = current;
             CASH *cbank = current->bank;
             current = current->next;
-            destructor(cbank);
+            destroy_aCash(cbank);
             free(temp);
         }
         a->count = 0;
@@ -433,7 +433,7 @@ void feach_list(LIST supp, LIST a, int func)
         int i = 0;
         while (current)
         {
-            CASH *bank = default_construct();
+            CASH *bank = def_aCash_construct();
             copy_aCash(bank, current->bank);
 
             support_user(bank, func);
@@ -509,10 +509,10 @@ void free_banks(LIST list)
         CASH *bank = list->root->bank;
         for (int i = 1; bank != NULL && i < list->count; i++)
         {
-            destructor(bank);
+            destroy_aCash(bank);
             bank = gbind_list(list, i);
         }
         bank = list->last->bank;
-        destructor(bank);
+        destroy_aCash(bank);
     }
 }

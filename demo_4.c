@@ -2,8 +2,11 @@
 
 int main(int argc, char const *argv[])
 {
-    if (argc < 4)
+    if ((argc < 4) || (argc > 5))
+    {
+        puts("Неверный запуск программы. Ожидалось 3 либо 4 аргумента командной строки.");
         exit(EXIT_FAILURE);
+    }
     if ((argc == 5) && (strcmp(argv[1], "get") == 0))
     {
         CASH *acc = NULL;
@@ -11,16 +14,19 @@ int main(int argc, char const *argv[])
         {
             acc = get_element_from_text_file(argv[3], atoi(argv[2]));
             show_info(acc, true);
-            destructor(acc);
+            destroy_aCash(acc);
         }
         else if ((strcmp(argv[4], "-b") == 0))
         {
-            acc = get_element_from_binary_file(argv[3], atoi(argv[2]), aCash_size(acc));
+            acc = get_element_from_binary_file(argv[3], atoi(argv[2]), aCash_size());
             show_info(acc, true);
-            destructor(acc);
+            destroy_aCash(acc);
         }
         else
+        {
             printf("Недопустимый запуск программы. Вероятно, Вы хотели ввести \"-b\" или \"-t\"?");
+            exit(EXIT_FAILURE);
+        }
     }
     else if (strcmp("save", argv[1]) == 0)
     {
@@ -40,7 +46,10 @@ int main(int argc, char const *argv[])
             save_in_binaryfile(argv[2], COUNT, banks);
         }
         else
+        {
             printf("Недопустимый запуск программы. Вероятно, Вы хотели ввести \"-b\" или \"-t\"?");
+            exit(EXIT_FAILURE);
+        }
     }
     else if (strcmp("load", argv[1]) == 0)
     {
@@ -58,14 +67,17 @@ int main(int argc, char const *argv[])
             free_mass_structs(cash, COUNT);
         }
         else
+        {
             printf("Недопустимый запуск программы. Вероятно, Вы хотели ввести \"-b\" или \"-t\"?");
+            exit(EXIT_FAILURE);
+        }
     }
     else if (strcmp("list", argv[1]) == 0)
     {
         int text_mode;
         if (strcmp("-t", argv[3]) == 0)
             text_mode = 0;
-        else if (strcmp("-t", argv[3]) == 0)
+        else if (strcmp("-b", argv[3]) == 0)
             text_mode = 1;
         else
             text_mode = -1;
@@ -75,17 +87,23 @@ int main(int argc, char const *argv[])
     {
         if (strcmp(argv[3], "-t") == 0)
         {
-            demo_elem_from_list_from_file(argv[2], 2, TEXT);
+            demo_elem_from_list_from_file(argv[2], 2, TEXT); // индекс передаётся через командную строку
         }
         else if (strcmp(argv[3], "-b") == 0)
         {
             demo_elem_from_list_from_file(argv[2], 2, BIN);
         }
         else
+        {
             printf("Недопустимый запуск программы. Вероятно, Вы хотели ввести \"-b\" или \"-t\"?");
+            exit(EXIT_FAILURE);
+        }
     }
     else
-        puts("Неверный запуск программы. Ожидалось 3 либо 4 аргумента в командной строке.");
+    {
+        printf("Неверный запуск программы. Ожидался один из аргументов: save, load, list, get; получено: %s\n.", argv[2]);
+        exit(EXIT_FAILURE);
+    }
 
     return 0;
 }

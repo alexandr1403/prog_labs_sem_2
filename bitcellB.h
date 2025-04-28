@@ -59,8 +59,8 @@ void set_otherfields(ulg *cell, ulg mask, int remove, uint user);
 void change_sets(ulg *, CELL *, char *, char *, int);
 void strshow_cellB(const ulg cell);
 void destroy_cell(CELL *cell);
-CELL *def_cell_construct();
-void cell_construct(CELL *cell, uint id, uint cost, SIZ size, uint period, uint safety_lvl, bool access_type, bool video);
+CELL *def_cell_struct_construct();
+void cell_struct_construct(CELL *cell, uint id, uint cost, SIZ size, uint period, uint safety_lvl, bool access_type, bool video);
 void show_cellstruct(const CELL *cell);
 char *structobits(CELL n, char *bitstr);
 

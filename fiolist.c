@@ -222,7 +222,7 @@ void load_cellstruct_from_file(CASH *bank, FILE *fp)
     bank->cellB->video = (bool)supp;
     count += fscanf(fp, " %u", &supp);
     bank->cellB->access_type = (bool)supp;
-    printf("count cell:%d\n", count);
+    // printf("count cell:%d\n", count);
     if (count != INP)
     {
         puts("Ошибка считывания данных.");
@@ -455,13 +455,14 @@ CASH *load_from_binfile(FILE *fp)
     count += fread(bank->data_open, sizeof(DATA), 1, fp);
     count += fread(bank->data_close, sizeof(DATA), 1, fp);
 
-    // printf("count:%zd\n%zd\n", count, 10 + LENID + LENNUM + LENSTRS + LENSTRS);
     if (count != (10 + LENID + LENNUM + LENSTRS + LENSTRS))
     {
         puts("Ошибка считывания данных.");
         exit(EXIT_FAILURE);
     }
 
+    free(padd_1);
+    free(padd_2);
     return bank;
 }
 
@@ -608,10 +609,15 @@ LIST load_list_from_binfile(const char *filename)
         bank = load_from_binfile(fp);
         bpush(a, bank);
     }
+    if (fclose(fp) == EOF)
+    {
+        puts("Ошибка закрытия файла.");
+        exit(EXIT_FAILURE);
+    }
     return a;
 }
 
-/*Демонстрация i-го элемента структуры, загруженной из текстововго файла*/
+/*Демонстрация i-го элемента структуры, загруженной из файла*/
 void demo_elem_from_list_from_file(const char *filename, int index, int mode)
 {
     LIST a = (mode == 0) ? load_list_from_file(filename) : load_list_from_binfile(filename);
@@ -621,7 +627,7 @@ void demo_elem_from_list_from_file(const char *filename, int index, int mode)
     destroy_list(a);
 }
 
-void list_of_reading_elements(const char *filename, int mode)
+void list_of_reading_elements_to_list(const char *filename, int mode)
 {
     if ((mode != 1) && (mode != 0))
     {

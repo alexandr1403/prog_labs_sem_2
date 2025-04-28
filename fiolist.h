@@ -1,10 +1,13 @@
 #ifndef FIO_H_
 #define FIO_H_
+
 #include "aCash.h"
 #include "contlist.h"
-#define COUNT 5
+#define COUNT 10000
 #define TEXT 0
 #define BIN 1
+// #define MASSFORM 0
+// #define LISTFORM 1
 
 /*Прототипы функций*/
 DATA *gen_data();

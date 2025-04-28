@@ -4,6 +4,8 @@
 DATA *def_data_construct()
 {
     DATA *data = (DATA *)malloc(sizeof(DATA));
+    if (!control_of_NULL(data))
+        return NULL;
 
     data->day = 0;
     data->mon = 0;
@@ -39,6 +41,8 @@ void copydatas(DATA *strop, DATA *strcl)
 CASH *def_aCash_construct()
 {
     CASH *bank = (CASH *)malloc(sizeof(CASH));
+    if (!control_of_NULL(bank))
+        return NULL;
 
     bank->id = (char *)malloc((LENID + 1) * sizeof(char));
     bank->num = (char *)malloc((LENNUM + 1) * sizeof(char));
@@ -131,20 +135,23 @@ void destroy_dat(DATA *dat)
 /*Функция деструктор для структуры aCash*/
 void destroy_aCash(CASH *bank)
 {
-    free(bank->id);
-    free(bank->num);
-    free(bank->val);
-    free(bank->type);
+    if (bank)
+    {
+        free(bank->id);
+        free(bank->num);
+        free(bank->val);
+        free(bank->type);
 
-    bank->balance = 0.0;
+        bank->balance = 0.0;
 
-    free(bank->data_open);
-    free(bank->data_close);
+        free(bank->data_open);
+        free(bank->data_close);
 
-    destroy_bons(bank->bonus);
-    bank->bank_cell = 0;
-    destroy_cell(bank->cellB);
-    free(bank);
+        destroy_bons(bank->bonus);
+        bank->bank_cell = 0;
+        destroy_cell(bank->cellB);
+        free(bank);
+    }
     bank = NULL;
 }
 
@@ -152,6 +159,8 @@ void destroy_aCash(CASH *bank)
 BNS *def_bonus_construct()
 {
     BNS *bonus = (BNS *)malloc(sizeof(BNS));
+    if (!control_of_NULL(bonus))
+        return NULL;
 
     bonus->bonuses = 0;
     bonus->bon_to_add = 0;

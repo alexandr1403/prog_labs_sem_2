@@ -1,5 +1,23 @@
 #include "fiolist.h"
 
+void control_of_memory(void *ptr)
+{
+    if (ptr == NULL)
+    {
+        puts("Ошибка выделения памяти.");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void control_of_open(FILE *fp)
+{
+    if (fp == NULL)
+    {
+        puts("Ошибка открытия файла.");
+        exit(EXIT_FAILURE);
+    }
+}
+
 /*Генерация одной структуры DATA (open)*/
 DATA *gen_data()
 {
@@ -14,6 +32,8 @@ DATA *gen_data()
         day = getrand(1, 31);
 
     DATA *open = def_data_construct();
+    control_of_memory(open);
+
     construct_data(open, year, month, day);
     return open;
 }
@@ -22,6 +42,7 @@ DATA *gen_data()
 BNS *gen_bonus()
 {
     BNS *bonus = def_bonus_construct();
+    control_of_memory(bonus);
     bonus_construct(bonus, getrand(0, 1000), getrand(5, 50), getrand(5, 50));
     return bonus;
 }
@@ -48,6 +69,7 @@ void gen_cellB(ulg *cell_1, CELL *cell_2)
 char *gen_string(size_t len)
 {
     char *res = (char *)calloc(len, sizeof(char));
+    control_of_memory(res);
     *res = getrand(1, 9) + '0'; // номера карты и счёта не могут начинаться с нуля
     for (size_t i = 1; i < len - 1; i++)
     {
@@ -70,8 +92,11 @@ CASH *gen_aCash()
     char *mass_valutes[] = {"доллар", "евро", "рубль", "фунт", "юань"};
     // CASH *bank = def_aCash_construct();
     CASH *bank = (CASH *)malloc(sizeof(CASH));
+    control_of_memory(bank);
     bank->type = (char *)malloc(20 * sizeof(char));
     bank->val = (char *)malloc(20 * sizeof(char));
+    control_of_memory(bank->type);
+    control_of_memory(bank->val);
 
     bank->balance = gen_balance();
     bank->bank_cell = 0;
@@ -93,6 +118,7 @@ CASH *gen_aCash()
 CASH **rand_gen_aCash_mass(size_t n)
 {
     CASH **mass_structs = (CASH **)malloc(sizeof(CASH *) * n);
+    control_of_memory(mass_structs);
     srand(time(0));
 
     for (size_t i = 0; i < n; i++)
@@ -105,9 +131,12 @@ CASH **rand_gen_aCash_mass(size_t n)
 /*Очистка массива указателей на структуры aCash*/
 void free_mass_structs(CASH **mass, size_t n)
 {
-    for (size_t i = 0; i < n; i++)
-        destroy_aCash(mass[i]);
-    free(mass);
+    if (mass)
+    {
+        for (size_t i = 0; i < n; i++)
+            destroy_aCash(mass[i]);
+        free(mass);
+    }
 }
 
 /*Запись одной структуры BNS в текстовый файл*/
@@ -141,7 +170,7 @@ void save_cellstruct_in_text(CASH *bank, FILE *fp)
     fprintf(fp, "%u ", bank->cellB->access_type);
 }
 
-/*Запись одной структуры в файл текстовый*/
+/*Запись одной структуры в текстовый файл*/
 void save_one_struct_in_file(CASH *bank, FILE *fp)
 {
     fprintf(fp, "%s ", bank->id);
@@ -162,57 +191,83 @@ void save_one_struct_in_file(CASH *bank, FILE *fp)
 size_t save_in_textfile(const char *filename, size_t n_mass, CASH **mass_structs)
 {
     FILE *fp = fopen(filename, "w");
+    control_of_open(fp);
     fprintf(fp, "%zd\n", n_mass);
     for (size_t i = 0; i < n_mass; i++)
         save_one_struct_in_file(mass_structs[i], fp);
 
-    fclose(fp);
+    if (fclose(fp) == EOF)
+    {
+        puts("Ошибка закрытия файла.");
+        exit(EXIT_FAILURE);
+    }
     return n_mass;
 }
 
 void load_cellstruct_from_file(CASH *bank, FILE *fp)
 {
     uint supp = 0;
-    fscanf(fp, " %u", &supp);
+    int count = 0;
+    count += fscanf(fp, " %u", &supp);
     bank->cellB->id = supp;
-    fscanf(fp, " %u", &supp);
+    count += fscanf(fp, " %u", &supp);
     bank->cellB->period = supp;
-    fscanf(fp, " %u", &supp);
+    count += fscanf(fp, " %u", &supp);
     bank->cellB->size = supp;
-    fscanf(fp, " %u", &supp);
+    count += fscanf(fp, " %u", &supp);
     bank->cellB->safety_lvl = supp;
-    fscanf(fp, " %u", &supp);
+    count += fscanf(fp, " %u", &supp);
     bank->cellB->cost = supp;
-    fscanf(fp, " %u", &supp);
+    count += fscanf(fp, " %u", &supp);
     bank->cellB->video = (bool)supp;
-    fscanf(fp, " %u", &supp);
+    count += fscanf(fp, " %u", &supp);
     bank->cellB->access_type = (bool)supp;
+    printf("count cell:%d\n", count);
+    if (count != INP)
+    {
+        puts("Ошибка считывания данных.");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void load_datas_from_file(CASH *bank, FILE *fp)
 {
-    fscanf(fp, " %u", &bank->data_open->day);
-    fscanf(fp, " %u", &bank->data_open->mon);
-    fscanf(fp, " %u", &bank->data_open->year);
+    int count = 0;
+    count += fscanf(fp, " %u", &bank->data_open->day);
+    count += fscanf(fp, " %u", &bank->data_open->mon);
+    count += fscanf(fp, " %u", &bank->data_open->year);
 
-    fscanf(fp, " %u", &bank->data_close->day);
-    fscanf(fp, " %u", &bank->data_close->mon);
-    fscanf(fp, " %u", &bank->data_close->year);
+    count += fscanf(fp, " %u", &bank->data_close->day);
+    count += fscanf(fp, " %u", &bank->data_close->mon);
+    count += fscanf(fp, " %u", &bank->data_close->year);
+    if (count != 6)
+    {
+        puts("Ошибка считывания данных.");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void load_bonus_from_file(CASH *bank, FILE *fp)
 {
-    fscanf(fp, " %d", &bank->bonus->bon_to_add);
-    fscanf(fp, " %d", &bank->bonus->bon_to_pay);
-    fscanf(fp, " %u", &bank->bonus->bonuses);
+    int count = 0;
+    count += fscanf(fp, " %d", &bank->bonus->bon_to_add);
+    count += fscanf(fp, " %d", &bank->bonus->bon_to_pay);
+    count += fscanf(fp, " %u", &bank->bonus->bonuses);
+    if (count != 3)
+    {
+        puts("Ошибка считывания данных.");
+        exit(EXIT_FAILURE);
+    }
 }
 
 /*Загрузка из текстового файла*/
 CASH *load_from_file(FILE *fp)
 {
     char ch = 0;
-    int i = 0;
+    int i = 0, count = 0;
     CASH *bank = def_aCash_construct();
+    control_of_memory(bank);
+
     while ((ch = getc(fp)) != '\n')
     {
         ungetc(ch, fp);
@@ -244,8 +299,13 @@ CASH *load_from_file(FILE *fp)
         }
         bank->val[i] = '\0';
         i = 0;
-        fscanf(fp, " %lf", &bank->balance);
-        fscanf(fp, " %lu", &bank->bank_cell);
+        count += fscanf(fp, " %lf", &bank->balance);
+        count += fscanf(fp, " %lu", &bank->bank_cell);
+        if (count != 2)
+        {
+            puts("Ошибка считывания данных.");
+            exit(EXIT_FAILURE);
+        }
 
         load_cellstruct_from_file(bank, fp);
         load_datas_from_file(bank, fp);
@@ -261,15 +321,25 @@ CASH *load_from_file(FILE *fp)
 CASH **load_mass_structs_from_file(const char *filename)
 {
     FILE *fp = fopen(filename, "r");
+    control_of_open(fp);
     size_t n_mass;
-    fscanf(fp, "%zd\n", &n_mass);
+    if (fscanf(fp, "%zd\n", &n_mass) != 1)
+    {
+        puts("Ошибка считывания данных.");
+        exit(EXIT_FAILURE);
+    }
     CASH **banks = (CASH **)malloc(sizeof(CASH *) * n_mass);
-
+    control_of_memory(banks);
     for (size_t i = 0; i < n_mass; i++)
     {
         banks[i] = load_from_file(fp);
     }
-    fclose(fp);
+
+    if (fclose(fp) == EOF)
+    {
+        puts("Ошибка закрытия файла.");
+        exit(EXIT_FAILURE);
+    }
     return banks;
 }
 
@@ -277,6 +347,8 @@ CASH **load_mass_structs_from_file(const char *filename)
 CASH *get_element_from_text_file(const char *filename, int index)
 {
     FILE *fp = fopen(filename, "r");
+    control_of_open(fp);
+
     char ch = 0;
     int count = 0;
     CASH *bank = NULL;
@@ -286,28 +358,34 @@ CASH *get_element_from_text_file(const char *filename, int index)
         bank = load_from_file(fp);
         if (count == index)
         {
-            fclose(fp);
+            if (fclose(fp) == EOF)
+            {
+                puts("Ошибка закрытия файла.");
+                exit(EXIT_FAILURE);
+            }
             return bank;
         }
         count++;
         destroy_aCash(bank);
     }
 
-    fclose(fp);
+    if (fclose(fp) == EOF)
+    {
+        puts("Ошибка закрытия файла.");
+        exit(EXIT_FAILURE);
+    }
     return NULL;
 }
 
 /*Сохранение одной структуры aCash в бинарный файл*/
 void save_one_struct_in_binaryfile(FILE *fp, CASH *bank)
 {
-    // size_t id = LENID + 1, num = LENNUM + 1, type = LENSTRS + 1, val = LENSTRS + 1;
-    // size_t struct_size = aCash_size(type, val);
     size_t type = strlen(bank->type) + 1, val = strlen(bank->val) + 1;
     size_t padding_type = LENSTRS - type, padding_val = LENSTRS - val;
     char *padd_1 = (char *)calloc(padding_type, sizeof(char));
     char *padd_2 = (char *)calloc(padding_val, sizeof(char));
-
-    // fwrite(&struct_size, sizeof(size_t), 1, fp); // размер будущей структуры
+    control_of_memory(padd_1);
+    control_of_memory(padd_2);
 
     fwrite(&bank->balance, sizeof(double), 1, fp);
     // fwrite(&id, sizeof(size_t), 1, fp);
@@ -325,47 +403,64 @@ void save_one_struct_in_binaryfile(FILE *fp, CASH *bank)
     fwrite(bank->bonus, sizeof(BNS), 1, fp);
     fwrite(bank->data_open, sizeof(DATA), 1, fp);
     fwrite(bank->data_close, sizeof(DATA), 1, fp);
+
+    free(padd_1);
+    free(padd_2);
 }
 
 /*Запись массива структур в бинарный файл*/
 void save_in_binaryfile(const char *filename, size_t n_mass, CASH **mass_structs)
 {
     FILE *fp = fopen(filename, "wb");
+    control_of_open(fp);
     fwrite(&n_mass, sizeof(size_t), 1, fp);
     for (size_t i = 0; i < n_mass; i++)
         save_one_struct_in_binaryfile(fp, mass_structs[i]);
-    fclose(fp);
+
+    if (fclose(fp) == EOF)
+    {
+        puts("Ошибка закрытия файла.");
+        exit(EXIT_FAILURE);
+    }
 }
 
 /*Заргрузка одной структуры aCash из бинарного файла*/
 CASH *load_from_binfile(FILE *fp)
 {
     CASH *bank = def_aCash_construct();
+    control_of_memory(bank);
 
-    size_t type, val;
+    size_t type, val, count = 0;
 
-    // fread(&struct_size, sizeof(size_t), 1, fp);
-
-    fread(&bank->balance, sizeof(double), 1, fp);
+    count += fread(&bank->balance, sizeof(double), 1, fp);
     // fread(&id, sizeof(size_t), 1, fp);
-    fread(bank->id, sizeof(char), LENID + 1, fp);
+    count += fread(bank->id, sizeof(char), LENID + 1, fp);
     // fread(&num, sizeof(size_t), 1, fp);
-    fread((bank->num), sizeof(char), LENNUM + 1, fp);
-    fread(&type, sizeof(size_t), 1, fp);
-    fread((bank->type), sizeof(char), type, fp);
+    count += fread((bank->num), sizeof(char), LENNUM + 1, fp);
+    count += fread(&type, sizeof(size_t), 1, fp);
+    count += fread((bank->type), sizeof(char), type, fp);
     size_t padding_type = LENSTRS - type; // padd
     char *padd_1 = (char *)calloc(padding_type, sizeof(char));
-    fread(padd_1, sizeof(char), padding_type, fp);
-    fread(&val, sizeof(size_t), 1, fp);
-    fread((bank->val), sizeof(char), val, fp);
+    control_of_memory(padd_1);
+    count += fread(padd_1, sizeof(char), padding_type, fp);
+    count += fread(&val, sizeof(size_t), 1, fp);
+    count += fread((bank->val), sizeof(char), val, fp);
     size_t padding_val = LENSTRS - val; // padd
     char *padd_2 = (char *)calloc(padding_val, sizeof(char));
-    fread(padd_2, sizeof(char), padding_val, fp);
-    fread(&(bank->bank_cell), sizeof(ulg), 1, fp);
-    fread(bank->cellB, sizeof(CELL), 1, fp);
-    fread(bank->bonus, sizeof(BNS), 1, fp);
-    fread(bank->data_open, sizeof(DATA), 1, fp);
-    fread(bank->data_close, sizeof(DATA), 1, fp);
+    control_of_memory(padd_2);
+    count += fread(padd_2, sizeof(char), padding_val, fp);
+    count += fread(&(bank->bank_cell), sizeof(ulg), 1, fp);
+    count += fread(bank->cellB, sizeof(CELL), 1, fp);
+    count += fread(bank->bonus, sizeof(BNS), 1, fp);
+    count += fread(bank->data_open, sizeof(DATA), 1, fp);
+    count += fread(bank->data_close, sizeof(DATA), 1, fp);
+
+    // printf("count:%zd\n%zd\n", count, 10 + LENID + LENNUM + LENSTRS + LENSTRS);
+    if (count != (10 + LENID + LENNUM + LENSTRS + LENSTRS))
+    {
+        puts("Ошибка считывания данных.");
+        exit(EXIT_FAILURE);
+    }
 
     return bank;
 }
@@ -373,14 +468,24 @@ CASH *load_from_binfile(FILE *fp)
 CASH **load_mass_structs_from_binfile(const char *filename)
 {
     FILE *fp = fopen(filename, "rb");
+    control_of_open(fp);
     size_t n_mass;
-    fread(&n_mass, sizeof(size_t), 1, fp);
+    if (fread(&n_mass, sizeof(size_t), 1, fp) != 1)
+    {
+        puts("Ошибка считывания данных.");
+        exit(EXIT_FAILURE);
+    }
     CASH **banks = (CASH **)malloc(sizeof(CASH *) * n_mass);
+    control_of_memory(banks);
 
     for (size_t i = 0; i < n_mass; i++)
         banks[i] = load_from_binfile(fp);
 
-    fclose(fp);
+    if (fclose(fp) == EOF)
+    {
+        puts("Ошибка закрытия файла.");
+        exit(EXIT_FAILURE);
+    }
     return banks;
 }
 
@@ -388,22 +493,27 @@ CASH **load_mass_structs_from_binfile(const char *filename)
 CASH *get_element_from_binary_file(const char *filename, int index, size_t element_size)
 {
     FILE *fp = fopen(filename, "rb");
+    control_of_open(fp);
     fseek(fp, index * (element_size + 2 * sizeof(size_t)) + sizeof(size_t), SEEK_SET);
     CASH *bank = load_from_binfile(fp);
-    // show_info(bank, true);
-    fclose(fp);
+    if (fclose(fp) == EOF)
+    {
+        puts("Ошибка закрытия файла.");
+        exit(EXIT_FAILURE);
+    }
     return bank;
 }
 
 /*Генерация n структур aCash и возврат их, помещённых в двусвязный список*/
 LIST rand_gen_struct_in_list(size_t n)
 {
-    time_t seed = time(0);
+    srand(time(0));
     LIST a = def_list_construct();
+    control_of_memory(a);
     CASH *bank;
     for (size_t i = 0; i < n; i++)
     {
-        bank = gen_aCash(&seed);
+        bank = gen_aCash();
         // insert_in_list(a, bank, i);
         bpush(a, bank);
     }
@@ -415,21 +525,32 @@ LIST rand_gen_struct_in_list(size_t n)
 void save_list_in_file(const char *filename, LIST a)
 {
     FILE *fp = fopen(filename, "w");
+    control_of_open(fp);
     fprintf(fp, "%d\n", a->count);
     for (ONE *i = a->root; i != NULL; i = i->next)
     {
         save_one_struct_in_file(i->bank, fp);
     }
-    fclose(fp);
+    if (fclose(fp) == EOF)
+    {
+        puts("Ошибка закрытия файла.");
+        exit(EXIT_FAILURE);
+    }
 }
 
 /*Загрузка списка структур из файла*/
 LIST load_list_from_file(const char *filename)
 {
     FILE *fp = fopen(filename, "r");
+    control_of_open(fp);
     LIST a = def_list_construct();
+    control_of_memory(a);
     size_t n;
-    fscanf(fp, "%zd\n", &n);
+    if (fscanf(fp, "%zd\n", &n) != 1)
+    {
+        puts("Ошибка считывания данных0.");
+        exit(EXIT_FAILURE);
+    }
 
     CASH *bank;
 
@@ -438,7 +559,12 @@ LIST load_list_from_file(const char *filename)
         bank = load_from_file(fp);
         bpush(a, bank);
     }
-    fclose(fp);
+
+    if (fclose(fp) == EOF)
+    {
+        puts("Ошибка закрытия файла.");
+        exit(EXIT_FAILURE);
+    }
     return a;
 }
 
@@ -455,16 +581,26 @@ void save_list_to_binfile(const char *filename, LIST a)
     for (ONE *curr = a->root; curr != NULL; curr = curr->next)
         save_one_struct_in_binaryfile(fp, curr->bank);
 
-    fclose(fp);
+    if (fclose(fp) == EOF)
+    {
+        puts("Ошибка закрытия файла.");
+        exit(EXIT_FAILURE);
+    }
 }
 
 /*Загрузка структур из бинарного файла в список*/
 LIST load_list_from_binfile(const char *filename)
 {
     LIST a = def_list_construct();
+    control_of_memory(a);
     FILE *fp = fopen(filename, "rb");
+    control_of_open(fp);
     size_t n;
-    fread(&n, sizeof(size_t), 1, fp);
+    if (fread(&n, sizeof(size_t), 1, fp) != 1)
+    {
+        puts("Ошибка считывания данных.");
+        exit(EXIT_FAILURE);
+    }
     CASH *bank;
 
     for (size_t i = 0; i < n; i++)
@@ -479,6 +615,7 @@ LIST load_list_from_binfile(const char *filename)
 void demo_elem_from_list_from_file(const char *filename, int index, int mode)
 {
     LIST a = (mode == 0) ? load_list_from_file(filename) : load_list_from_binfile(filename);
+    control_of_memory(a);
     CASH *bank = gbind_list(a, index);
     show_info(bank, true);
     destroy_list(a);
@@ -492,6 +629,7 @@ void list_of_reading_elements(const char *filename, int mode)
         exit(EXIT_FAILURE);
     }
     LIST banks = (mode == TEXT) ? load_list_from_file(filename) : load_list_from_binfile(filename);
+    control_of_memory(banks);
     printf("Прочитано %d элементов:\n", banks->count);
 
     int index = 0;

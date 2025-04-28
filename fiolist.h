@@ -38,5 +38,6 @@ void demo_elem_from_list_from_file(const char *filename, int index, int mode);
 void save_list_to_binfile(const char *filename, LIST a);
 LIST load_list_from_binfile(const char *filename);
 void list_of_reading_elements(const char *filename, int mode);
+void control_of_memory(void *ptr);
 
 #endif

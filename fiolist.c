@@ -627,7 +627,7 @@ void demo_elem_from_list_from_file(const char *filename, int index, int mode)
     destroy_list(a);
 }
 
-void list_of_reading_elements_to_list(const char *filename, int mode)
+void list_of_reading_elements(const char *filename, int mode)
 {
     if ((mode != 1) && (mode != 0))
     {
